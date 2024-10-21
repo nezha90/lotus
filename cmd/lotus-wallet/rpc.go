@@ -28,16 +28,16 @@ type rpcRequest struct {
 
 func methodFilterMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var bodyBuffer bytes.Buffer
-		// 使用 io.TeeReader 读取 body，同时将数据复制到 bodyBuffer 中
-		r.Body = io.NopCloser(io.TeeReader(r.Body, &bodyBuffer))
-
-		body := bodyBuffer.Bytes()
+		bodyBytes, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Unable to read request body", http.StatusInternalServerError)
+			return
+		}
 
 		fmt.Println("unmarshal json body")
 		// 解析 JSON-RPC 请求
 		var req rpcRequest
-		if err := json.Unmarshal(body, &req); err != nil {
+		if err := json.Unmarshal(bodyBytes, &req); err != nil {
 			http.Error(w, "2 Invalid JSON-RPC request", http.StatusBadRequest)
 			return
 		}
@@ -54,6 +54,9 @@ func methodFilterMiddleware(next http.Handler) http.Handler {
 			http.Error(w, fmt.Sprintf("3 Unsupported method: %s", req.Method), http.StatusBadRequest)
 			return
 		}
+
+		// 重新设置 Body 以便后续可以再次读取
+		r.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
 		next.ServeHTTP(w, r)
 	})
