@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/filecoin-project/go-address"
@@ -56,6 +57,8 @@ func methodFilterMiddleware(next http.Handler) http.Handler {
 			http.Error(w, fmt.Sprintf("3 Unsupported method: %s", req.Method), http.StatusBadRequest)
 			return
 		}
+
+		r.Body = io.NopCloser(bytes.NewBuffer(body))
 
 		next.ServeHTTP(w, r)
 	})
