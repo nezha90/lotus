@@ -85,6 +85,7 @@ func handleWalletSign(w http.ResponseWriter, params []json.RawMessage) {
 		return
 	} else if msgMeta.Type != api.MTChainMsg {
 		http.Error(w, "8 Failed to sign this type", http.StatusBadRequest)
+		return
 	}
 
 	var addr address.Address
@@ -95,7 +96,13 @@ func handleWalletSign(w http.ResponseWriter, params []json.RawMessage) {
 	}
 	fmt.Println(addr)
 
-	msg, err := types.DecodeMessage(params[1])
+	var msgByte []byte
+	if err := json.Unmarshal(params[1], &msgByte); err != nil {
+		http.Error(w, "12 Failed to parse sign message", http.StatusBadRequest)
+		return
+	}
+
+	msg, err := types.DecodeMessage(msgByte)
 	if err != nil {
 		http.Error(w, "11 Failed to parse sign message", http.StatusBadRequest)
 		return
