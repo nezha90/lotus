@@ -17,10 +17,11 @@ const (
 
 // 定义用于解析 JSON-RPC 请求的结构体
 type rpcRequest struct {
-	JSONRPC string          `json:"jsonrpc"`
-	Method  string          `json:"method"`
-	Params  json.RawMessage `json:"params"`
-	ID      interface{}     `json:"id"`
+	JSONRPC string            `json:"jsonrpc"`
+	Method  string            `json:"method"`
+	Params  []json.RawMessage `json:"params"`
+	ID      int               `json:"id"`
+	Meta    json.RawMessage   `json:"meta"`
 }
 
 func methodFilterMiddleware(next http.Handler) http.Handler {
@@ -35,6 +36,7 @@ func methodFilterMiddleware(next http.Handler) http.Handler {
 
 		// 解析 JSON-RPC 请求
 		var req rpcRequest
+		fmt.Println(body)
 		if err := json.Unmarshal(body, &req); err != nil {
 			http.Error(w, "2 Invalid JSON-RPC request", http.StatusBadRequest)
 			return
@@ -59,21 +61,14 @@ func methodFilterMiddleware(next http.Handler) http.Handler {
 }
 
 // 处理 WalletSign 请求，解析参数
-func handleWalletSign(w http.ResponseWriter, rawParams json.RawMessage) {
-	// 解析 WalletSign 的 params
-	var params []interface{}
-	if err := json.Unmarshal(rawParams, &params); err != nil {
-		http.Error(w, "4 Invalid params", http.StatusBadRequest)
-		return
-	}
-
+func handleWalletSign(w http.ResponseWriter, params []json.RawMessage) {
 	// 校验参数长度
-	if len(params) != 3 {
+	if len(params) != 2 {
 		http.Error(w, "5 Invalid number of params", http.StatusBadRequest)
 		return
 	}
 	var msgMeta api.MsgMeta
-	msgMetaParamsBytes, err := json.Marshal(params[0]) // 参数列表中第三个参数为消息对象
+	msgMetaParamsBytes, err := json.Marshal(params[2]) // 参数列表中第三个参数为消息对象
 	if err != nil {
 		http.Error(w, "6 Failed to parse sign params", http.StatusBadRequest)
 		return
