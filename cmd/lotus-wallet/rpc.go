@@ -55,8 +55,6 @@ func methodFilterMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		r.Body = io.NopCloser(bytes.NewBuffer(body))
-
 		next.ServeHTTP(w, r)
 	})
 }
