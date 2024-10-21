@@ -57,9 +57,7 @@ func methodFilterMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		http.Error(w, "stop", http.StatusBadRequest)
-
-		//next.ServeHTTP(w, r)
+		next.ServeHTTP(w, r)
 	})
 }
 
@@ -109,14 +107,4 @@ func handleWalletSign(w http.ResponseWriter, params []json.RawMessage) {
 	}
 
 	fmt.Println(msg)
-
-	//// 记录 from, to 和消息类型
-	//fmt.Printf("Signing from: %s, to: %s, message type: %s\n", signParams.From, signParams.To, signParams.Msg.MessageType)
-	//
-	//// 模拟返回签名结果
-	//result := map[string]string{
-	//	"signature": "mocked_signature",
-	//}
-	//response, _ := json.Marshal(result)
-	//w.Write(response)
 }
