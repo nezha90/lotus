@@ -71,16 +71,10 @@ func handleWalletSign(w http.ResponseWriter, params []json.RawMessage) {
 		return
 	}
 
-	fmt.Println("parse msg meta")
 	var msgMeta api.MsgMeta
-	msgMetaParamsBytes, err := json.Marshal(params[2]) // 参数列表中第三个参数为消息对象
-	if err != nil {
-		http.Error(w, "6 Failed to parse sign params", http.StatusBadRequest)
-		return
-	}
 
 	fmt.Println("unmarshal msg meta")
-	if err := json.Unmarshal(msgMetaParamsBytes, &msgMeta); err != nil {
+	if err := json.Unmarshal(params[2], &msgMeta); err != nil {
 		http.Error(w, "7 Failed to parse sign message", http.StatusBadRequest)
 		return
 	}
