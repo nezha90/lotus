@@ -27,6 +27,7 @@ type rpcRequest struct {
 func methodFilterMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// 读取请求体
+		fmt.Println("read")
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			http.Error(w, "1 Failed to read request body", http.StatusBadRequest)
@@ -34,14 +35,15 @@ func methodFilterMiddleware(next http.Handler) http.Handler {
 		}
 		defer r.Body.Close()
 
+		fmt.Println("unmarshal json body")
 		// 解析 JSON-RPC 请求
 		var req rpcRequest
-		fmt.Println(body)
 		if err := json.Unmarshal(body, &req); err != nil {
 			http.Error(w, "2 Invalid JSON-RPC request", http.StatusBadRequest)
 			return
 		}
 
+		fmt.Println("switch message type")
 		// 检查 method 字段是否为允许的 RPC 方法
 		switch req.Method {
 		case MethodWalletBalance, MethodWalletList:
@@ -63,10 +65,13 @@ func methodFilterMiddleware(next http.Handler) http.Handler {
 // 处理 WalletSign 请求，解析参数
 func handleWalletSign(w http.ResponseWriter, params []json.RawMessage) {
 	// 校验参数长度
+	fmt.Println("check len")
 	if len(params) != 2 {
 		http.Error(w, "5 Invalid number of params", http.StatusBadRequest)
 		return
 	}
+
+	fmt.Println("parse msg meta")
 	var msgMeta api.MsgMeta
 	msgMetaParamsBytes, err := json.Marshal(params[2]) // 参数列表中第三个参数为消息对象
 	if err != nil {
@@ -74,11 +79,13 @@ func handleWalletSign(w http.ResponseWriter, params []json.RawMessage) {
 		return
 	}
 
+	fmt.Println("unmarshal msg meta")
 	if err := json.Unmarshal(msgMetaParamsBytes, &msgMeta); err != nil {
 		http.Error(w, "7 Failed to parse sign message", http.StatusBadRequest)
 		return
 	}
 
+	fmt.Println("ok")
 	if msgMeta.Type == api.MTBlock {
 		return
 	} else if msgMeta.Type != api.MTChainMsg {
