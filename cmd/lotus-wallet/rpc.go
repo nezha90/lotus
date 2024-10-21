@@ -66,7 +66,7 @@ func methodFilterMiddleware(next http.Handler) http.Handler {
 func handleWalletSign(w http.ResponseWriter, params []json.RawMessage) {
 	// 校验参数长度
 	fmt.Println("check len")
-	if len(params) != 2 {
+	if len(params) != 3 {
 		http.Error(w, "5 Invalid number of params", http.StatusBadRequest)
 		return
 	}
