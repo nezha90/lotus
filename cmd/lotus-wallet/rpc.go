@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/lotus/api"
+	"github.com/filecoin-project/lotus/chain/types"
 	"io"
 	"net/http"
 )
@@ -87,26 +88,20 @@ func handleWalletSign(w http.ResponseWriter, params []json.RawMessage) {
 	}
 
 	var addr address.Address
-	var msgByte []byte
 
-	addrParamsBytes, err := json.Marshal(params[0]) // 参数列表中第三个参数为消息对象
-	if err != nil {
-		http.Error(w, "9 Failed to parse sign params", http.StatusBadRequest)
-		return
-	}
-
-	if err := json.Unmarshal(addrParamsBytes, &addr); err != nil {
+	if err := json.Unmarshal(params[0], &addr); err != nil {
 		http.Error(w, "10 Failed to parse sign message", http.StatusBadRequest)
 		return
 	}
+	fmt.Println(addr)
 
-	msgByte, err = json.Marshal(params[0]) // 参数列表中第三个参数为消息对象
+	msg, err := types.DecodeMessage(params[1])
 	if err != nil {
-		http.Error(w, "11 Failed to parse sign params", http.StatusBadRequest)
+		http.Error(w, "11 Failed to parse sign message", http.StatusBadRequest)
 		return
 	}
-	fmt.Println(msgByte)
-	fmt.Println(addr)
+
+	fmt.Println(msg)
 
 	//// 记录 from, to 和消息类型
 	//fmt.Printf("Signing from: %s, to: %s, message type: %s\n", signParams.From, signParams.To, signParams.Msg.MessageType)
