@@ -28,14 +28,11 @@ type rpcRequest struct {
 
 func methodFilterMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// 读取请求体
-		fmt.Println("read")
-		body, err := io.ReadAll(r.Body)
-		if err != nil {
-			http.Error(w, "1 Failed to read request body", http.StatusBadRequest)
-			return
-		}
-		defer r.Body.Close()
+		var bodyBuffer bytes.Buffer
+		// 使用 io.TeeReader 读取 body，同时将数据复制到 bodyBuffer 中
+		r.Body = io.NopCloser(io.TeeReader(r.Body, &bodyBuffer))
+
+		body := bodyBuffer.Bytes()
 
 		fmt.Println("unmarshal json body")
 		// 解析 JSON-RPC 请求
