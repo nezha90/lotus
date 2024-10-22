@@ -77,9 +77,9 @@ func (c *LoggedWallet) WalletSign(ctx context.Context, k address.Address, msg []
 			return nil, xerrors.Errorf("parsing block header error: %w", err)
 		}
 	default:
-		return nil, xerrors.Errorf("unsupported message meta type")
+		//return nil, xerrors.Errorf("unsupported message meta type")
 
-		//log.Infow("WalletSign", "address", k, "type", meta.Type)
+		log.Infow("WalletSign", "address", k, "type", meta.Type)
 	}
 
 	return c.under.WalletSign(ctx, k, msg, meta)
