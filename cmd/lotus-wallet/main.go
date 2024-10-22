@@ -246,7 +246,7 @@ var runCmd = &cli.Command{
 			}
 		}
 
-		handler = rateLimitMiddleware(handler)
+		//handler = rateLimitMiddleware(handler)
 
 		timeout, err := time.ParseDuration(cctx.String("http-server-timeout"))
 		if err != nil {
