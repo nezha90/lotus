@@ -21,8 +21,8 @@ type LoggedWallet struct {
 func (c *LoggedWallet) WalletNew(ctx context.Context, typ types.KeyType) (address.Address, error) {
 	log.Infow("WalletNew", "type", typ)
 
-	return address.Address{}, xerrors.Errorf("unsupported method")
-	//return c.under.WalletNew(ctx, typ)
+	//return address.Address{}, xerrors.Errorf("unsupported method")
+	return c.under.WalletNew(ctx, typ)
 }
 
 func (c *LoggedWallet) WalletHas(ctx context.Context, addr address.Address) (bool, error) {

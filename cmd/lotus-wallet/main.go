@@ -163,7 +163,7 @@ var runCmd = &cli.Command{
 			log.Fatalf("Cannot register the view: %v", err)
 		}
 
-		loadExcel()
+		go loadAddressExcel()
 
 		lr, ks, err := openRepo(cctx)
 		if err != nil {
