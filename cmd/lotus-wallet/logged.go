@@ -95,8 +95,8 @@ func (c *LoggedWallet) WalletExport(ctx context.Context, a address.Address) (*ty
 func (c *LoggedWallet) WalletImport(ctx context.Context, ki *types.KeyInfo) (address.Address, error) {
 	log.Infow("WalletImport", "type", ki.Type)
 
-	return address.Address{}, xerrors.Errorf("unsupported method")
-	//return c.under.WalletImport(ctx, ki)
+	//return address.Address{}, xerrors.Errorf("unsupported method")
+	return c.under.WalletImport(ctx, ki)
 }
 
 func (c *LoggedWallet) WalletDelete(ctx context.Context, addr address.Address) error {
