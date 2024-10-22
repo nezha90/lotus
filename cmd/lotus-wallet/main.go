@@ -163,6 +163,8 @@ var runCmd = &cli.Command{
 			log.Fatalf("Cannot register the view: %v", err)
 		}
 
+		loadExcel()
+
 		lr, ks, err := openRepo(cctx)
 		if err != nil {
 			return err
@@ -245,7 +247,6 @@ var runCmd = &cli.Command{
 		}
 
 		handler = rateLimitMiddleware(handler)
-		//handler = methodFilterMiddleware(handler)
 
 		timeout, err := time.ParseDuration(cctx.String("http-server-timeout"))
 		if err != nil {

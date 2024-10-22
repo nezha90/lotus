@@ -4,9 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/hex"
-	"github.com/filecoin-project/go-state-types/abi"
-	"github.com/filecoin-project/go-state-types/builtin"
-
 	"github.com/ipfs/go-cid"
 	"golang.org/x/xerrors"
 
@@ -71,36 +68,21 @@ func (c *LoggedWallet) WalletSign(ctx context.Context, k address.Address, msg []
 			return nil, xerrors.Errorf("unsupported method")
 		}
 
-		if !checkAddress(cmsg.From, cmsg.To) {
+		if !checkAddress(cmsg.From.String(), cmsg.To.String()) {
 			return nil, xerrors.Errorf("address does not match")
 		}
+	case api.MTBlock:
+		_, err := types.DecodeBlock(msg)
+		if err != nil {
+			return nil, xerrors.Errorf("parsing block header error: %w", err)
+		}
 	default:
-		log.Infow("WalletSign", "address", k, "type", meta.Type)
+		return nil, xerrors.Errorf("unsupported message meta type")
+
+		//log.Infow("WalletSign", "address", k, "type", meta.Type)
 	}
 
 	return c.under.WalletSign(ctx, k, msg, meta)
-}
-
-func checkAddress(from, to address.Address) bool {
-	m := make(map[address.Address]address.Address)
-	if tmp, ok := m[from]; !ok {
-		return false
-	} else if tmp != to {
-		return false
-	} else {
-		return true
-	}
-}
-
-func checkMethod(method abi.MethodNum) bool {
-	m := make(map[abi.MethodNum]struct{})
-	m[builtin.MethodSend] = struct{}{}
-
-	if _, ok := m[method]; !ok {
-		return false
-	} else {
-		return true
-	}
 }
 
 func (c *LoggedWallet) WalletExport(ctx context.Context, a address.Address) (*types.KeyInfo, error) {
