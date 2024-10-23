@@ -14,6 +14,7 @@ func loadAddressExcel() {
 	ticker := time.NewTicker(time.Minute * 10)
 	defer ticker.Stop() // 程序结束时停止 ticker
 
+	readAddressExcel()
 	for range ticker.C {
 		readAddressExcel()
 	}
