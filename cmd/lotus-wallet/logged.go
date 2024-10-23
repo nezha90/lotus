@@ -26,18 +26,32 @@ func (c *LoggedWallet) WalletNew(ctx context.Context, typ types.KeyType) (addres
 }
 
 func (c *LoggedWallet) WalletHas(ctx context.Context, addr address.Address) (bool, error) {
-	log.Infow("WalletHas", "address", addr)
+	clientIp := ctx.Value("client_ip")
+
+	log.Infow("WalletHas", "address", addr, "client", clientIp)
 
 	return c.under.WalletHas(ctx, addr)
 }
 
 func (c *LoggedWallet) WalletList(ctx context.Context) ([]address.Address, error) {
-	log.Infow("WalletList")
+	clientIp := ctx.Value("client_ip")
+
+	log.Infow("WalletList", "client", clientIp)
 
 	return c.under.WalletList(ctx)
 }
 
 func (c *LoggedWallet) WalletSign(ctx context.Context, k address.Address, msg []byte, meta api.MsgMeta) (*crypto.Signature, error) {
+	clientIp := ctx.Value("client_ip")
+	uuid := ctx.Value("uuid")
+
+	log.Infow("WalletSign",
+		"uuid", uuid,
+		"client", clientIp,
+		"type", meta.Type,
+		"status", "start",
+	)
+
 	switch meta.Type {
 	case api.MTChainMsg:
 		var cmsg types.Message
@@ -55,6 +69,7 @@ func (c *LoggedWallet) WalletSign(ctx context.Context, k address.Address, msg []
 		}
 
 		log.Infow("WalletSign",
+			"uuid", uuid,
 			"address", k,
 			"type", meta.Type,
 			"from", cmsg.From,
@@ -62,15 +77,27 @@ func (c *LoggedWallet) WalletSign(ctx context.Context, k address.Address, msg []
 			"value", types.FIL(cmsg.Value),
 			"feecap", types.FIL(cmsg.RequiredFunds()),
 			"method", cmsg.Method,
-			"params", hex.EncodeToString(cmsg.Params))
+			"params", hex.EncodeToString(cmsg.Params),
+		)
 
 		if !checkMethod(cmsg.Method) {
-			log.Errorw("WalletSign checkMethod failed", "address", k, "method", cmsg.Method)
+			log.Errorw("WalletSign",
+				"uuid", uuid,
+				"error", "unsupported method",
+				"address", k,
+				"method", cmsg.Method,
+			)
 			//return nil, xerrors.Errorf("unsupported method")
 		}
 
 		if !checkAddress(cmsg.From.String(), cmsg.To.String()) {
-			log.Errorw("WalletSign checkAddress failed", "address", k, "from", cmsg.From, "to", cmsg.To)
+			log.Errorw("WalletSign",
+				"uuid", uuid,
+				"error", "address does not match",
+				"address", k,
+				"from", cmsg.From,
+				"to", cmsg.To,
+			)
 			//return nil, xerrors.Errorf("address does not match")
 		}
 	case api.MTBlock:
@@ -79,7 +106,6 @@ func (c *LoggedWallet) WalletSign(ctx context.Context, k address.Address, msg []
 			log.Errorw("WalletSign", "block decode err", err, "msg", msg)
 			//return nil, xerrors.Errorf("parsing block header error: %w", err)
 		}
-		log.Infow("WalletSign", "address", k, "type", meta.Type)
 
 	default:
 		id, err := cid.Parse(msg)
@@ -87,9 +113,12 @@ func (c *LoggedWallet) WalletSign(ctx context.Context, k address.Address, msg []
 			log.Errorw("WalletSign cid parse success", "cid", id, "msg", msg)
 			//return nil, xerrors.Errorf("unsupported message meta type")
 		}
-
-		log.Infow("WalletSign", "address", k, "type", meta.Type)
 	}
+
+	log.Infow("WalletSign",
+		"uuid", uuid,
+		"status", "finish",
+	)
 
 	return c.under.WalletSign(ctx, k, msg, meta)
 }
