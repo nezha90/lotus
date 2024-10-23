@@ -65,19 +65,28 @@ func (c *LoggedWallet) WalletSign(ctx context.Context, k address.Address, msg []
 			"params", hex.EncodeToString(cmsg.Params))
 
 		if !checkMethod(cmsg.Method) {
-			return nil, xerrors.Errorf("unsupported method")
+			log.Errorw("WalletSign checkMethod failed", "address", k, "method", cmsg.Method)
+			//return nil, xerrors.Errorf("unsupported method")
 		}
 
 		if !checkAddress(cmsg.From.String(), cmsg.To.String()) {
-			return nil, xerrors.Errorf("address does not match")
+			log.Errorw("WalletSign checkAddress failed", "address", k, "from", cmsg.From, "to", cmsg.To)
+			//return nil, xerrors.Errorf("address does not match")
 		}
 	case api.MTBlock:
 		_, err := types.DecodeBlock(msg)
 		if err != nil {
-			return nil, xerrors.Errorf("parsing block header error: %w", err)
+			log.Errorw("WalletSign", "block decode err", err, "msg", msg)
+			//return nil, xerrors.Errorf("parsing block header error: %w", err)
 		}
+		log.Infow("WalletSign", "address", k, "type", meta.Type)
+
 	default:
-		//return nil, xerrors.Errorf("unsupported message meta type")
+		id, err := cid.Parse(msg)
+		if err == nil {
+			log.Errorw("WalletSign cid parse success", "cid", id, "msg", msg)
+			//return nil, xerrors.Errorf("unsupported message meta type")
+		}
 
 		log.Infow("WalletSign", "address", k, "type", meta.Type)
 	}
