@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/hex"
+	"fmt"
 	"github.com/ipfs/go-cid"
 	"golang.org/x/xerrors"
 
@@ -48,6 +49,7 @@ func (c *LoggedWallet) WalletSign(ctx context.Context, k address.Address, msg []
 	log.Infow("WalletSign",
 		"uuid", uuid,
 		"client", clientIp,
+		"address", k,
 		"type", meta.Type,
 		"status", "start",
 	)
@@ -70,8 +72,7 @@ func (c *LoggedWallet) WalletSign(ctx context.Context, k address.Address, msg []
 
 		log.Infow("WalletSign",
 			"uuid", uuid,
-			"address", k,
-			"type", meta.Type,
+			"cid", bc,
 			"from", cmsg.From,
 			"to", cmsg.To,
 			"value", types.FIL(cmsg.Value),
@@ -84,7 +85,6 @@ func (c *LoggedWallet) WalletSign(ctx context.Context, k address.Address, msg []
 			log.Errorw("WalletSign",
 				"uuid", uuid,
 				"error", "unsupported method",
-				"address", k,
 				"method", cmsg.Method,
 			)
 			//return nil, xerrors.Errorf("unsupported method")
@@ -94,7 +94,6 @@ func (c *LoggedWallet) WalletSign(ctx context.Context, k address.Address, msg []
 			log.Errorw("WalletSign",
 				"uuid", uuid,
 				"error", "address does not match",
-				"address", k,
 				"from", cmsg.From,
 				"to", cmsg.To,
 			)
@@ -103,15 +102,20 @@ func (c *LoggedWallet) WalletSign(ctx context.Context, k address.Address, msg []
 	case api.MTBlock:
 		_, err := types.DecodeBlock(msg)
 		if err != nil {
-			log.Errorw("WalletSign", "block decode err", err, "msg", msg)
+			log.Errorw("WalletSign",
+				"uuid", uuid,
+				"error", fmt.Sprintf("decode block failed, %v", err),
+				"msg", msg)
 			//return nil, xerrors.Errorf("parsing block header error: %w", err)
 		}
-
 	default:
-		id, err := cid.Parse(msg)
+		_, err := cid.Parse(msg)
 		if err == nil {
-			log.Errorw("WalletSign cid parse success", "cid", id, "msg", msg)
-			//return nil, xerrors.Errorf("unsupported message meta type")
+			log.Errorw("WalletSign",
+				"uuid", uuid,
+				"error", "other message types should not sign cid",
+				"msg", msg)
+			//return nil, xerrors.Errorf("other message types should not sign cid")
 		}
 	}
 
