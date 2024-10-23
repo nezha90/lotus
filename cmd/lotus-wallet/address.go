@@ -52,6 +52,7 @@ func readAddressExcel() {
 		tmpMap[from][to] = struct{}{}
 	}
 
+	log.Infof("reload address: %v", tmpMap)
 	lk.Lock()
 	defer lk.Unlock()
 
