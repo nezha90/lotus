@@ -87,7 +87,7 @@ func (c *LoggedWallet) WalletSign(ctx context.Context, k address.Address, msg []
 				"error", "unsupported method",
 				"method", cmsg.Method,
 			)
-			//return nil, xerrors.Errorf("unsupported method")
+			return nil, xerrors.Errorf("unsupported method")
 		}
 
 		if !checkAddress(cmsg.From.String(), cmsg.To.String()) {
@@ -97,7 +97,7 @@ func (c *LoggedWallet) WalletSign(ctx context.Context, k address.Address, msg []
 				"from", cmsg.From,
 				"to", cmsg.To,
 			)
-			//return nil, xerrors.Errorf("address does not match")
+			return nil, xerrors.Errorf("address does not match")
 		}
 	case api.MTBlock:
 		_, err := types.DecodeBlock(msg)
@@ -106,7 +106,7 @@ func (c *LoggedWallet) WalletSign(ctx context.Context, k address.Address, msg []
 				"uuid", uuid,
 				"error", fmt.Sprintf("decode block failed, %v", err),
 				"msg", msg)
-			//return nil, xerrors.Errorf("parsing block header error: %w", err)
+			return nil, xerrors.Errorf("parsing block header error: %w", err)
 		}
 	default:
 		_, err := cid.Parse(msg)
@@ -115,7 +115,7 @@ func (c *LoggedWallet) WalletSign(ctx context.Context, k address.Address, msg []
 				"uuid", uuid,
 				"error", "other message types should not sign cid",
 				"msg", msg)
-			//return nil, xerrors.Errorf("other message types should not sign cid")
+			return nil, xerrors.Errorf("other message types should not sign cid")
 		}
 	}
 
