@@ -20,7 +20,9 @@ type LoggedWallet struct {
 }
 
 func (c *LoggedWallet) WalletNew(ctx context.Context, typ types.KeyType) (address.Address, error) {
-	log.Infow("WalletNew", "type", typ)
+	clientIp := ctx.Value("client_ip")
+
+	log.Infow("WalletNew", "client", clientIp, "type", typ)
 
 	//return address.Address{}, xerrors.Errorf("unsupported method")
 	return c.under.WalletNew(ctx, typ)
@@ -128,21 +130,27 @@ func (c *LoggedWallet) WalletSign(ctx context.Context, k address.Address, msg []
 }
 
 func (c *LoggedWallet) WalletExport(ctx context.Context, a address.Address) (*types.KeyInfo, error) {
-	log.Infow("WalletExport", "address", a)
+	clientIp := ctx.Value("client_ip")
+
+	log.Infow("WalletExport", "client", clientIp, "address", a)
 
 	return nil, xerrors.Errorf("unsupported method")
 	//return c.under.WalletExport(ctx, a)
 }
 
 func (c *LoggedWallet) WalletImport(ctx context.Context, ki *types.KeyInfo) (address.Address, error) {
-	log.Infow("WalletImport", "type", ki.Type)
+	clientIp := ctx.Value("client_ip")
+
+	log.Infow("WalletImport", "client", clientIp, "type", ki.Type)
 
 	//return address.Address{}, xerrors.Errorf("unsupported method")
 	return c.under.WalletImport(ctx, ki)
 }
 
 func (c *LoggedWallet) WalletDelete(ctx context.Context, addr address.Address) error {
-	log.Infow("WalletDelete", "address", addr)
+	clientIp := ctx.Value("client_ip")
+
+	log.Infow("WalletDelete", "client", clientIp, "address", addr)
 
 	return xerrors.Errorf("unsupported method")
 	//return c.under.WalletDelete(ctx, addr)
