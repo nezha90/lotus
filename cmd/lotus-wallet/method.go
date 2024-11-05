@@ -28,6 +28,7 @@ func init() {
 	MethodMap[builtin.MethodsVerifiedRegistry.ExtendClaimTerms] = struct{}{}
 
 	MethodMap[builtin.MethodsMiner.ChangePeerID] = struct{}{}
+	MethodMap[builtin.MethodsMiner.ChangeMultiaddrs] = struct{}{}
 	MethodMap[builtin.MethodsMultisig.Approve] = struct{}{}
 	MethodMap[builtin.MethodsMultisig.Propose] = struct{}{}
 
