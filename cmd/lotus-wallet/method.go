@@ -34,6 +34,7 @@ func init() {
 
 	MethodMap[builtin.MethodsMiner.DeclareFaultsRecovered] = struct{}{}
 
+	MethodMap[builtin.MethodsMiner.TerminateSectors] = struct{}{}
 }
 
 func checkMethod(method abi.MethodNum) bool {
